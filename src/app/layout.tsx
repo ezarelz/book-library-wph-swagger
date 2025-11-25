@@ -5,6 +5,7 @@ import { queryClient } from '@/lib/query-client';
 import { UserProvider } from '@/context/UserContext';
 import Navbar from '@/components/navbar/Navbar';
 import { Quicksand } from 'next/font/google';
+import { ToastProvider } from '@/context/ToastContext';
 import './globals.css';
 
 const quicksand = Quicksand({
@@ -22,9 +23,10 @@ export default function RootLayout({
       <body>
         <QueryClientProvider client={queryClient}>
           <UserProvider>
-            {' '}
-            <Navbar />
-            <main className='min-h-screen'>{children}</main>
+            <ToastProvider>
+              <Navbar />
+              <main className='min-h-screen page-wrapper'>{children}</main>
+            </ToastProvider>
           </UserProvider>{' '}
         </QueryClientProvider>
       </body>

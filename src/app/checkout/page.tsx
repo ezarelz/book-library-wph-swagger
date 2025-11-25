@@ -206,7 +206,7 @@ export default function CheckoutPage() {
                 </label>
 
                 <div className='space-y-2'>
-                  {[3, 5, 10].map((days) => (
+                  {[3, 7, 10].map((days) => (
                     <label
                       key={days}
                       className='flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50'

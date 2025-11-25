@@ -133,7 +133,7 @@ export default function BookDetailPage() {
         <div className='bg-white rounded-2xl shadow-lg overflow-hidden'>
           <div className='md:flex'>
             {/* Book Cover */}
-            <div className='md:w-1/3 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center p-12 relative'>
+            <div className='md:w-1/3 bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center p-12 relative'>
               {isValidImageUrl(book.coverImage) ? (
                 <div className='relative w-full max-w-sm aspect-[2/3]'>
                   <Image

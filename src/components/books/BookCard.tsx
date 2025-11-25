@@ -21,7 +21,7 @@ export default function BookCard({ book }: BookCardProps) {
     <Link href={`/books/${book.id}`}>
       <div className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer h-full'>
         {/* Book Cover */}
-        <div className='relative h-64 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center overflow-hidden'>
+        <div className='relative aspect-[3/4] b w full g-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center rounded-md overflow-hidden'>
           {hasValidCoverImage ? (
             <Image
               src={book.coverImage!}

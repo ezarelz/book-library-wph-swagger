@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useUserContext } from '@/context/UserContext';
-import { userApi } from '@/lib/api';
+import { booksApi, userApi } from '@/lib/api';
 import Footer from '@/components/footer/Footer';
 import Image from 'next/image';
+import BorrowedList from '@/components/borrowed/BorrowedList';
+import ReviewsList from '@/components/reviews/ReviewsList';
+import { BorrowedBook, Book } from '@/types/book';
+import { Review } from '@/lib/api/reviewsApi';
+import { normalizeBook } from '@/utils/normalizeBook';
 
 interface ProfileData {
   profile: {
@@ -23,41 +28,10 @@ interface ProfileData {
   reviewsCount: number;
 }
 
-interface Loan {
-  id: number;
-  bookId: number;
-  userId: number;
-  borrowedAt: string;
-  dueDate: string;
-  returnedAt: string | null;
-  status: string;
-  book: {
-    id: number;
-    title: string;
-    coverImage: string;
-    author: {
-      name: string;
-    };
-  };
-}
-
-interface Review {
-  id: number;
-  bookId: number;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  book: {
-    id: number;
-    title: string;
-    coverImage: string;
-  };
-}
-
 export default function ProfilePage() {
   const { isAuthenticated, isLoading: authLoading } = useUserContext();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loans, setLoans] = useState<(BorrowedBook & { book?: Book })[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
@@ -99,7 +73,15 @@ export default function ProfilePage() {
       try {
         const res = await userApi.getMyLoans();
         if (res.success) {
-          setLoans(res.data.loans || []);
+          // Map API response to BorrowedBook type
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mappedLoans = (res.data.loans || []).map((loan: any) => ({
+            ...loan,
+            borrowDate: loan.borrowedAt,
+            book: loan.Book ? normalizeBook(loan.Book) : undefined,
+          }));
+          setLoans(mappedLoans);
         }
       } catch (error) {
         console.error('Failed to fetch loans:', error);
@@ -111,14 +93,50 @@ export default function ProfilePage() {
     }
   }, [activeTab, isAuthenticated]);
 
-  // Fetch reviews when reviews tab is active
+  const [enrichedReviews, setEnrichedReviews] = useState<Review[]>([]);
+
+  // Fetch reviews + enrich with book details
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const res = await userApi.getMyReviews();
-        if (res.success) {
-          setReviews(res.data.reviews || []);
-        }
+
+        if (!res.success) return;
+
+        const baseReviews = res.data.reviews || [];
+        setReviews(baseReviews); // simpan raw dulu
+
+        // Kumpulkan bookId unik
+        const ids = baseReviews.map((r: Review) => r.bookId);
+        const uniqueIds = Array.from(new Set(ids));
+
+        // Fetch detail book
+        const promises = uniqueIds.map((id) =>
+          booksApi.getById(Number(id)).catch(() => null)
+        );
+        const results = await Promise.all(promises);
+
+        const bookMap = new Map<number, Book>();
+        results.forEach((res) => {
+          if (res?.data) bookMap.set(res.data.id, res.data);
+        });
+
+        // Merge review + detail book
+        const merged = baseReviews.map((r: Review) => {
+          const detailedBook = bookMap.get(r.bookId);
+
+          return {
+            ...r,
+            Book: {
+              ...r.Book,
+              ...detailedBook,
+              Author: detailedBook?.Author ?? r.Book?.Author ?? null,
+              Category: detailedBook?.Category ?? r.Book?.Category ?? null,
+            },
+          };
+        });
+
+        setEnrichedReviews(merged);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
       }
@@ -341,70 +359,7 @@ export default function ProfilePage() {
             <h2 className='text-2xl font-bold text-gray-900 mb-8'>
               Borrowed List
             </h2>
-            {loans.length > 0 ? (
-              <div className='space-y-4'>
-                {loans
-                  .filter((loan) => loan.status === 'ACTIVE')
-                  .map((loan) => (
-                    <div
-                      key={loan.id}
-                      className='bg-gray-50 rounded-2xl p-6 flex gap-4'
-                    >
-                      <img
-                        src={loan.book.coverImage}
-                        alt={loan.book.title}
-                        className='w-20 h-28 object-cover rounded-lg'
-                      />
-                      <div className='flex-grow'>
-                        <h3 className='font-bold text-lg text-gray-900'>
-                          {loan.book.title}
-                        </h3>
-                        <p className='text-sm text-gray-600'>
-                          by {loan.book.author.name}
-                        </p>
-                        <p className='text-sm text-gray-500 mt-2'>
-                          Due: {new Date(loan.dueDate).toLocaleDateString()}
-                        </p>
-                        <span
-                          className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                            loan.status === 'ACTIVE'
-                              ? 'bg-blue-100 text-blue-700'
-                              : loan.status === 'OVERDUE'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}
-                        >
-                          {loan.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className='bg-gray-50 rounded-2xl p-12 text-center'>
-                <div className='text-gray-400 mb-4'>
-                  <svg
-                    className='w-16 h-16 mx-auto'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={1.5}
-                      d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
-                    />
-                  </svg>
-                </div>
-                <h3 className='text-lg font-semibold text-gray-900 mb-2'>
-                  No borrowed books yet
-                </h3>
-                <p className='text-gray-500'>
-                  Your borrowed books will appear here
-                </p>
-              </div>
-            )}
+            <BorrowedList borrowedBooks={loans} />
           </div>
         )}
 
@@ -412,81 +367,7 @@ export default function ProfilePage() {
         {activeTab === 'reviews' && (
           <div>
             <h2 className='text-2xl font-bold text-gray-900 mb-8'>Reviews</h2>
-            {reviews.length > 0 ? (
-              <div className='space-y-4'>
-                {reviews
-                  .filter((review) => review.book) // Filter out reviews without book data
-                  .map((review) => (
-                    <div
-                      key={review.id}
-                      className='bg-gray-50 rounded-2xl p-6 flex gap-4'
-                    >
-                      <img
-                        src={review.book?.coverImage || '/placeholder-book.png'}
-                        alt={review.book?.title || 'Book'}
-                        className='w-20 h-28 object-cover rounded-lg'
-                      />
-                      <div className='flex-grow'>
-                        <h3 className='font-bold text-lg text-gray-900'>
-                          {review.book?.title || 'Unknown Book'}
-                        </h3>
-                        <div className='flex items-center gap-1 mt-1'>
-                          {[...Array(5)].map((_, i) => (
-                            <svg
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
-                              />
-                            </svg>
-                          ))}
-                        </div>
-                        <p className='text-sm text-gray-700 mt-2'>
-                          {review.comment}
-                        </p>
-                        <p className='text-xs text-gray-400 mt-2'>
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className='bg-gray-50 rounded-2xl p-12 text-center'>
-                <div className='text-gray-400 mb-4'>
-                  <svg
-                    className='w-16 h-16 mx-auto'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={1.5}
-                      d='M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
-                    />
-                  </svg>
-                </div>
-                <h3 className='text-lg font-semibold text-gray-900 mb-2'>
-                  No reviews yet
-                </h3>
-                <p className='text-gray-500'>
-                  Your book reviews will appear here
-                </p>
-              </div>
-            )}
+            <ReviewsList reviews={enrichedReviews} />
           </div>
         )}
       </main>

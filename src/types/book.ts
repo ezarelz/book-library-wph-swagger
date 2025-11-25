@@ -14,14 +14,15 @@ export interface Category {
 }
 
 export interface Book {
+  averageRating: number;
   id: number;
   title: string;
-  author: string; // Fallback for backward compatibility
+  author: string;
   publisher?: string;
   year?: number;
   isbn?: string;
-  category: string; // Fallback for backward compatibility
-  stock?: number; // Legacy field, use availableCopies instead
+  category: string;
+  stock?: number;
   totalCopies?: number;
   availableCopies?: number;
   description?: string;
@@ -29,7 +30,7 @@ export interface Book {
   rating?: number;
   createdAt?: string;
   updatedAt?: string;
-  // Enriched data from API
+  //Enrich From API
   Author?: Author;
   Category?: Category;
 }

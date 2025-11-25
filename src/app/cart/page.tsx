@@ -35,6 +35,7 @@ export default function CartPage() {
 
   // Load cart dari localStorage
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCartItems(getCart());
   }, []);
 
