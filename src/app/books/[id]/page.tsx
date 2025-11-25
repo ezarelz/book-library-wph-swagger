@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -10,23 +9,7 @@ import Image from 'next/image';
 import Footer from '@/components/footer/Footer';
 import { isValidImageUrl } from '@/utils/imageUtils';
 
-// Local fake cart (FE-only)
-const CART_KEY = 'fake_cart';
-
-const getCart = () => {
-  if (typeof window === 'undefined') return [];
-  return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
-};
-
-const addToCartLocal = (book: any) => {
-  const cart = getCart();
-  const exists = cart.some((i: { id: any }) => i.id === book.id);
-  if (!exists) {
-    cart.push(book);
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  }
-  return cart;
-};
+import { addToCartLocal } from '@/lib/cartLocal';
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -50,7 +33,7 @@ export default function BookDetailPage() {
   // FE always uses availableCopies
   const availableCopies = book?.availableCopies ?? book?.totalCopies ?? 0;
 
-  // ❌ Invalid ID
+  //  Invalid ID
   if (!isValidId) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -71,7 +54,7 @@ export default function BookDetailPage() {
     );
   }
 
-  // ⏳ Loading
+  //  Loading
   if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -83,7 +66,7 @@ export default function BookDetailPage() {
     );
   }
 
-  // ❌ Book Not Found
+  //  Book Not Found
   if (!book) {
     return (
       <div className='min-h-screen bg-gray-50 flex items-center justify-center'>

@@ -70,7 +70,7 @@ export default function NewBookPage() {
 
   // Mutation to create a new author
   const createAuthorMutation = useMutation({
-    mutationFn: (name: string) => authorsApi.create({ name }),
+    mutationFn: (name: string) => authorsApi.create({ name, bio: '' }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['authors'] });
       // Set the newly created author's ID
@@ -88,7 +88,7 @@ export default function NewBookPage() {
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message ||
         (error as { message?: string })?.message ||
-        'Failed to create author. Please try again.';
+        'Failed to create author. The backend service is currently unavailable for creating new authors. Please select an existing author from the list instead.';
       alert(errorMessage);
     },
   });

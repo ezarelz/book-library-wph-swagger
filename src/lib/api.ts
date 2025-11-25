@@ -264,7 +264,7 @@ export const adminApi = {
       return res.data;
     }
     // For admin, use /api/loans/my which works with admin token
-    // Note: This endpoint might return all loans when called by admin
+
     const res = await api.get('/api/loans/my', {
       params: {
         page: params?.page,
@@ -281,6 +281,31 @@ export const adminApi = {
 
   getOverview: async () => {
     const res = await api.get('/api/admin/overview');
+    return res.data;
+  },
+};
+
+/* ================================
+   USER API
+================================ */
+export const userApi = {
+  getProfile: async () => {
+    const res = await api.get('/api/me');
+    return res.data;
+  },
+
+  updateProfile: async (data: { name?: string; email?: string }) => {
+    const res = await api.patch('/api/me', data);
+    return res.data;
+  },
+
+  getMyLoans: async () => {
+    const res = await api.get('/api/me/loans');
+    return res.data;
+  },
+
+  getMyReviews: async () => {
+    const res = await api.get('/api/me/reviews');
     return res.data;
   },
 };

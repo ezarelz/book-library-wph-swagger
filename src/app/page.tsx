@@ -12,12 +12,12 @@ import Footer from '@/components/footer/Footer';
 import { Button } from '@/components/ui/button';
 
 const categories = [
-  { name: 'Fiction', icon: '✍️' },
-  { name: 'Non-Fiction', icon: '📖' },
-  { name: 'Self Improvement', icon: '📚' },
-  { name: 'Finance', icon: '💰' },
-  { name: 'Science', icon: '🔬' },
-  { name: 'Education', icon: '🎓' },
+  { name: 'Fiction', icon: 'fiction.svg' },
+  { name: 'Non-Fiction', icon: 'non-fiction.svg' },
+  { name: 'Self-Improvement', icon: 'self-improvement.svg' },
+  { name: 'Finance', icon: 'finance.svg' },
+  { name: 'Science', icon: 'science.svg' },
+  { name: 'Education', icon: 'education.svg' },
 ];
 
 // Hero Banner Carousel Component
@@ -39,10 +39,10 @@ function HeroBanner() {
   };
 
   return (
-    <section className='py-8 bg-white'>
+    <section className='py-4 md:py-8 bg-white'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Banner Container with rounded corners */}
-        <div className='relative overflow-hidden bg-gradient-to-b from-[#7ec8e3] via-[#b8dcef] to-white rounded-3xl h-[441px]'>
+        <div className='relative overflow-hidden bg-gradient-to-b from-[#7ec8e3] via-[#b8dcef] to-white rounded-2xl md:rounded-3xl h-[200px] sm:h-[280px] md:h-[360px] lg:h-[441px]'>
           {/* Carousel Container */}
           <div className='relative w-full h-full'>
             {/* Slide Wrapper */}
@@ -59,7 +59,7 @@ function HeroBanner() {
                   {/* Main hero content */}
                   <div className='relative w-full h-full flex items-center justify-center'>
                     {/* Left character - child on book */}
-                    <div className='absolute left-0 bottom-0 w-48 md:w-64 lg:w-80 z-10'>
+                    <div className='absolute left-0 bottom-0 w-32 sm:w-40 md:w-56 lg:w-80 z-10'>
                       <Image
                         src='/banner/left.png'
                         alt='Child reading on a book'
@@ -73,7 +73,7 @@ function HeroBanner() {
                     {/* Center text */}
                     <div className='text-center z-20 px-4'>
                       <h1
-                        className='text-5xl md:text-6xl lg:text-7xl font-extrabold text-white'
+                        className='text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white'
                         style={{
                           textShadow:
                             '3px 3px 0 #7cb4e8, -3px -3px 0 #7cb4e8, 3px -3px 0 #7cb4e8, -3px 3px 0 #7cb4e8, 0 0 20px rgba(124, 180, 232, 0.5)',
@@ -89,7 +89,7 @@ function HeroBanner() {
                     </div>
 
                     {/* Right character - child on paper plane */}
-                    <div className='absolute right-0 bottom-0 w-48 md:w-64 lg:w-80 z-10'>
+                    <div className='absolute right-0 bottom-0 w-32 sm:w-40 md:w-56 lg:w-80 z-10'>
                       <Image
                         src='/banner/right.png'
                         alt='Child on paper plane'
@@ -153,14 +153,16 @@ function PopularAuthorsSection() {
   return (
     <section className='py-12 bg-white'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <h2 className='text-3xl font-bold text-gray-900 mb-8'>Popular Authors</h2>
+        <h2 className='text-3xl font-bold text-gray-900 mb-8'>
+          Popular Authors
+        </h2>
 
         {isLoading ? (
-          <div className='flex gap-6 overflow-x-auto pb-4'>
+          <div className='flex flex-col md:flex-row gap-4 md:gap-6 md:overflow-x-auto pb-4'>
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className='flex-shrink-0 w-64 bg-gray-100 rounded-lg p-4 animate-pulse'
+                className='flex-shrink-0 w-full md:w-64 bg-gray-100 rounded-lg p-4 animate-pulse'
               >
                 <div className='flex items-center gap-4'>
                   <div className='w-16 h-16 bg-gray-300 rounded-full'></div>
@@ -173,16 +175,22 @@ function PopularAuthorsSection() {
             ))}
           </div>
         ) : authors.length > 0 ? (
-          <div className='flex gap-6 overflow-x-auto pb-4'>
+          <div className='flex flex-col md:flex-row gap-4 md:gap-6 md:overflow-x-auto pb-4'>
             {authors.map((author: Author & { bookCount?: number }) => (
               <Link
                 key={author.id}
                 href={`/books?authorId=${author.id}`}
-                className='flex-shrink-0 w-64 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow'
+                className='flex-shrink-0 w-full md:w-64 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow'
               >
                 <div className='flex items-center gap-4'>
-                  <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0'>
-                    {author.name?.charAt(0).toUpperCase() || 'A'}
+                  <div className='w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden flex-shrink-0 bg-gray-100'>
+                    <Image
+                      src='/avatar.svg'
+                      alt={author.name}
+                      width={64}
+                      height={64}
+                      className='w-full h-full object-cover'
+                    />
                   </div>
                   <div className='flex-1 min-w-0'>
                     <h3 className='font-semibold text-gray-900 truncate'>
@@ -294,15 +302,23 @@ export default function HomePage() {
       {/* Categories */}
       <section className='py-12 bg-white'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
+          <div className='grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4'>
             {categories.map((category) => (
               <Link
                 key={category.name}
                 href={`/books?category=${category.name}`}
-                className='flex flex-col items-center p-6 bg-gray-50 rounded-xl hover:bg-blue-50 hover:shadow-md transition-all cursor-pointer'
+                className='flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-blue-100/50 rounded-2xl hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer group'
               >
-                <div className='text-4xl mb-2'>{category.icon}</div>
-                <span className='text-sm font-medium text-gray-700'>
+                <div className='w-16 h-16 mb-3 flex items-center justify-center group-hover:scale-110 transition-transform duration-200'>
+                  <Image
+                    src={`/categories/${category.icon}`}
+                    alt={category.name}
+                    width={64}
+                    height={64}
+                    className='w-full h-full object-contain'
+                  />
+                </div>
+                <span className='text-sm font-medium text-gray-900 text-center'>
                   {category.name}
                 </span>
               </Link>
@@ -314,10 +330,12 @@ export default function HomePage() {
       {/* Recommendations */}
       <section className='py-12 bg-gray-50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <h2 className='text-3xl font-bold text-gray-900 mb-8'>Recommendation</h2>
+          <h2 className='text-3xl font-bold text-gray-900 mb-8'>
+            Recommendation
+          </h2>
 
           {isLoading ? (
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6'>
+            <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6'>
               {[...Array(10)].map((_, i) => (
                 <div
                   key={i}
@@ -333,13 +351,17 @@ export default function HomePage() {
             </div>
           ) : books.length > 0 ? (
             <>
-              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8'>
+              <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8'>
                 {books.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}
               </div>
               <div className='flex justify-center'>
-                <Button asChild variant='outline'>
+                <Button
+                  asChild
+                  variant='outline'
+                  className='px-8 py-2 rounded-lg border-gray-300 hover:bg-gray-50'
+                >
                   <Link href='/books'>Load More</Link>
                 </Button>
               </div>

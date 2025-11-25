@@ -362,7 +362,7 @@ export default function AdminBooksPage() {
                           } else if (availableCopies > 0) {
                             // If no loans yet but copies available
                             return (
-                              <span className='px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded'>
+                              <span className='px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded'>
                                 {availableCopies} Created
                               </span>
                             );
@@ -374,7 +374,7 @@ export default function AdminBooksPage() {
                             );
                           } else {
                             return (
-                              <span className='px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded'>
+                              <span className='px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded'>
                                 Out of stock
                               </span>
                             );

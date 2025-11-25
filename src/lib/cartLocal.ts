@@ -1,6 +1,15 @@
 export const CART_KEY = 'fake_cart';
 
-export const getCart = () => {
+export interface CartItem {
+  id: number;
+  title: string;
+  author?: string;
+  category?: string;
+  coverImage?: string;
+  availableCopies?: number;
+}
+
+export const getCart = (): CartItem[] => {
   if (typeof window === 'undefined') return [];
 
   try {
@@ -10,12 +19,15 @@ export const getCart = () => {
   }
 };
 
-export const saveCart = (items) => {
+export const saveCart = (items: CartItem[]): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(CART_KEY, JSON.stringify(items));
+
+  // Dispatch custom event for same-tab cart updates
+  window.dispatchEvent(new CustomEvent('cartUpdated', { detail: items }));
 };
 
-export const addToCartLocal = (book) => {
+export const addToCartLocal = (book: CartItem): CartItem[] => {
   const cart = getCart();
 
   const exists = cart.some((i) => i.id === book.id);
@@ -27,12 +39,12 @@ export const addToCartLocal = (book) => {
   return cart;
 };
 
-export const removeFromCartLocal = (bookId) => {
+export const removeFromCartLocal = (bookId: number): CartItem[] => {
   const cart = getCart().filter((i) => i.id !== bookId);
   saveCart(cart);
   return cart;
 };
 
-export const clearCartLocal = () => {
+export const clearCartLocal = (): void => {
   saveCart([]);
 };
