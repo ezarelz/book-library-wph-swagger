@@ -269,21 +269,32 @@ export default function CheckoutPage() {
  * Small UI helpers
  ---------------------------------------- */
 
-function Input({ label, value, disabled = true }) {
+type InputProps = {
+  label: string;
+  value: string | number | undefined;
+  disabled?: boolean;
+};
+
+function Input({ label, value, disabled = true }: InputProps) {
   return (
     <div className='mb-4'>
       <label className='block text-sm font-medium mb-1'>{label}</label>
       <input
         type='text'
-        value={value || ''}
+        value={value ?? ''}
         disabled={disabled}
         className='w-full px-4 py-2 border rounded bg-gray-50'
       />
     </div>
   );
 }
+type CheckboxProps = {
+  checked: boolean;
+  onChange: (val: boolean) => void;
+  text: string;
+};
 
-function Checkbox({ checked, onChange, text }) {
+function Checkbox({ checked, onChange, text }: CheckboxProps) {
   return (
     <label className='flex items-start mb-3 cursor-pointer'>
       <input
